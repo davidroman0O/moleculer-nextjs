@@ -1,6 +1,6 @@
 {
   "name": "moleculer-nextjs",
-  "version": "0.0.1",
+  "version": "0.0.4",
   "description": "Mixin for Node-nextjs",
   "main": "index.js",
   "scripts": {
@@ -53,6 +53,9 @@
     "next": "^5.1.0",
     "path": "^0.12.7",
     "react": "^16.3.2",
-    "react-dom": "^16.3.2"
+    "react-dom": "^16.3.2",
+    "webpack": "^4.6.0",
+    "webpack-dev-middleware": "^3.1.2",
+    "webpack-hot-middleware": "^2.22.1"
   }
 }

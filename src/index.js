@@ -24,34 +24,40 @@ module.exports = {
 	 * Methods
 	 */
 	methods: {
-		build(dev, dir) {
-			return new Promise((resolve, reject) => {
-				if (!dev) {
-					//	 ( cd www/fo && ../../node_modules/next/dist/bin/next build )
-					const command = `( cd ${dir} && rm -rf .next && ../../node_modules/next/dist/bin/next build )`;
-					this.logger.info(this.schema.settings.app.name, " - Command - ", command);
-					// exec(`(cd ${dir} && ls)`, (err, stdout, stderr) => {
-					// 	console.log(stdout);
-					// });
-					exec(command, (err, stdout, stderr) => {
-						if (err) {
-							console.log(err, stderr);
-							reject(err);
-						}
-						if (stderr.length > 0) {
-							this.logger.info(this.schema.settings.app.name, `stderr: ${stderr}`);
-							reject(new Error(stderr));
-						}
-						this.logger.info(this.schema.settings.app.name, `stdout: ${stdout}`);
-						resolve();
-					});
-				} else {
-					this.logger.info(this.schema.settings.app.name, " - No Command");
-					resolve();
-				}
-				// resolve();
-			});
-		},
+
+		/*
+			Should not be used by a nodejs application
+			This could cause memory leaks in production in some case
+			You should handle next build by yourself in production
+		*/
+		// build(dev, dir) {
+		// 	return new Promise((resolve, reject) => {
+		// 		if (!dev) {
+
+		// 			const command = `( cd ${dir} && rm -rf .next && ../../node_modules/next/dist/bin/next build )`;
+		// 			this.logger.info(this.schema.settings.app.name, " - Command - ", command);
+
+		// 			setTimeout(() => {
+		// 				exec(command, (err, stdout, stderr) => {
+		// 					if (err) {
+		// 						console.log(err, stderr);
+		// 						reject(err);
+		// 					}
+		// 					if (stderr.length > 0) {
+		// 						this.logger.info(this.schema.settings.app.name, `stderr: ${stderr}`);
+		// 						reject(new Error(stderr));
+		// 					}
+		// 					this.logger.info(this.schema.settings.app.name, `stdout: ${stdout}`);
+		// 					resolve();
+		// 				});
+		// 			}, 250);
+		// 		} else {
+		// 			this.logger.info(this.schema.settings.app.name, " - No Command");
+		// 			resolve();
+		// 		}
+		// 		// resolve();
+		// 	});
+		// },
 
 		copyCommonFolder(source, destination) {
 			ncp(source, destination, (err) => {
@@ -154,13 +160,30 @@ module.exports = {
 
 		this.logger.info(this.schema.settings.app.name, " - created");
 
-		this.build(this.schema.settings.app.dev, dir)
-		.then(() =>
-			this.start(
-				Object.assign(this.schema.settings.app, {
-					dir
-				})
-			)
+		//	We must nextjs build before launching the nodejs app
+		// let promise = undefined;
+
+		// if (this.schema.settings.app.build) {
+		// 	promise = this.build(this.schema.settings.app.dev, dir)
+		// 	.then(() => {
+		// 		return this.start(
+		// 			Object.assign(this.schema.settings.app, {
+		// 				dir
+		// 			})
+		// 		);
+		// 	})
+		// } else {
+		// 	promise = this.start(
+		// 		Object.assign(this.schema.settings.app, {
+		// 			dir
+		// 		})
+		// 	);
+		// }
+
+		this.start(
+			Object.assign(this.schema.settings.app, {
+				dir
+			})
 		)
 		.then(() => {
 			this.logger.info(this.schema.settings.app.name, "Success start NextJS", this.schema.settings.app.dir);
