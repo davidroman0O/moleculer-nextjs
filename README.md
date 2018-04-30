@@ -16,7 +16,10 @@ $ npm install moleculer-nextjs --save
 # Note
 I've not finished it yet but it worked.
 See the usage, i'll make a small documentation in few days!
+<<<<<<< HEAD
 An example is in prepration with moleculer-socketio. 
+=======
+>>>>>>> 74876502e6e730e6333d987cc9e79679e29306c3
 
 # Usage
 
@@ -65,4 +68,8 @@ module.exports = {
 }
 
 
+<<<<<<< HEAD
 ```
+=======
+```
+>>>>>>> 74876502e6e730e6333d987cc9e79679e29306c3
