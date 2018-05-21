@@ -1,6 +1,6 @@
 {
   "name": "moleculer-nextjs",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Mixin for Node-nextjs",
   "main": "index.js",
   "scripts": {
@@ -48,9 +48,10 @@
     "node": ">= 6.x.x"
   },
   "dependencies": {
+    "babel-plugin-transform-define": "^1.3.0",
     "express": "^4.16.3",
     "ncp": "^2.0.0",
-    "next": "^5.1.0",
+    "next": "^6.0.3",
     "path": "^0.12.7",
     "react": "^16.3.2",
     "react-dom": "^16.3.2",

@@ -25,39 +25,84 @@ module.exports = {
 	 */
 	methods: {
 
-		/*
-			Should not be used by a nodejs application
-			This could cause memory leaks in production in some case
-			You should handle next build by yourself in production
-		*/
-		// build(dev, dir) {
-		// 	return new Promise((resolve, reject) => {
-		// 		if (!dev) {
+		getRoutes(stack) {
+	        const routes = (stack || [])
+	                // We are interested only in endpoints and router middleware.
+	                .filter(it => it.route || it.name === 'router')
+	                // The magic recursive conversion.
+	                .reduce((result, it) => {
+	                        if (! it.route) {
+	                                // We are handling a router middleware.
+	                                const stack = it.handle.stack
+	                                const routes = this.getRoutes(stack)
 
-		// 			const command = `( cd ${dir} && rm -rf .next && ../../node_modules/next/dist/bin/next build )`;
-		// 			this.logger.info(this.schema.settings.app.name, " - Command - ", command);
+	                                return result.concat(routes)
+	                        }
 
-		// 			setTimeout(() => {
-		// 				exec(command, (err, stdout, stderr) => {
-		// 					if (err) {
-		// 						console.log(err, stderr);
-		// 						reject(err);
-		// 					}
-		// 					if (stderr.length > 0) {
-		// 						this.logger.info(this.schema.settings.app.name, `stderr: ${stderr}`);
-		// 						reject(new Error(stderr));
-		// 					}
-		// 					this.logger.info(this.schema.settings.app.name, `stdout: ${stdout}`);
-		// 					resolve();
-		// 				});
-		// 			}, 250);
-		// 		} else {
-		// 			this.logger.info(this.schema.settings.app.name, " - No Command");
-		// 			resolve();
-		// 		}
-		// 		// resolve();
-		// 	});
-		// },
+	                        // We are handling an endpoint.
+	                        const methods = it.route.methods
+	                        const path = it.route.path
+
+	                        const routes = Object
+	                                .keys(methods)
+	                                .map(m => [ m.toUpperCase(), path ])
+
+	                        return result.concat(routes)
+	                }, [])
+	                // We sort the data structure by route path.
+	                .sort((prev, next) => {
+	                        const [ prevMethod, prevPath ] = prev
+	                        const [ nextMethod, nextPath ] = next
+
+	                        if (prevPath < nextPath) {
+	                                return -1
+	                        }
+
+	                        if (prevPath > nextPath) {
+	                                return 1
+	                        }
+
+	                        return 0
+	                })
+
+	        return routes
+		},
+
+		infoAboutRoutes(app) {
+		        const entryPoint = app._router && app._router.stack
+		        const routes = this.getRoutes(entryPoint)
+
+		        const info = routes
+		                .reduce((result, it) => {
+		                        const [ method, path ] = it
+
+		                        return result + `${method.padEnd(6)} ${path}\n`
+		                }, '')
+
+		        return info
+		},
+
+
+		matchRoutes(server, app, handle) {
+			return new Promise((resolve, reject) => {
+				if (!this.schema.hasOwnProperty("routes")) {
+					this.logger.info("NextJs - No routes");
+					resolve();
+				}
+
+				const routes = this.schema.routes;
+
+				// this.logger.info("NextJs - There are routes");
+
+				Object.keys(routes).forEach((key) => {
+					const callback = routes[key];
+					// this.logger.info("NextJs - Route ", key, " connected");
+					server.get(key, callback.bind({server, app, handle}));
+				});
+
+				resolve();
+			});
+		},
 
 		copyCommonFolder(source, destination) {
 			ncp(source, destination, (err) => {
@@ -86,30 +131,46 @@ module.exports = {
 				const app = next(
 					params
 				);
+				this.app = app;
 
-				const handle = app.getRequestHandler()
+				const handle = this.app.getRequestHandler()
 
-				app.prepare()
+				this.app.prepare()
 				.then(() => {
-					const server = express();
 
-					this.app = app;
+					const server = express();
 					this.server = server;
 
-					this.schema.methods.onPrepare(server, app);
+					if (this.schema.methods.hasOwnProperty("onPrepare")) {
+						this.schema.methods.onPrepare(server, app);
+					}
 
-					server.get('*', (req, res) => {
-						return handle(req, res);
+					this.matchRoutes(this.server, app, handle)
+					.then(() => {
+
+						//	Basic handle request
+						server.get('*', (req, res) => {
+							return handle(req, res);
+						});
+
+						const getRoutes = require('get-routes');
+						const routes = getRoutes(server);
+
+						routes["get"].map((route) => {
+							this.logger.info("NextJs - ", route);
+						});
+
+						server.listen(this.schema.settings.app.port, (err) => {
+							if (err) {
+								this.logger.error(this.schema.settings.app.name, " - error", err);
+								throw err
+							}
+							this.logger.info(this.schema.settings.app.name, " - Ready on ", `port ${this.schema.settings.app.port}`);
+							resolve();
+						})
+
 					});
 
-					server.listen(this.schema.settings.app.port, (err) => {
-						if (err) {
-							this.logger.error(this.schema.settings.app.name, " - error", err);
-							throw err
-						}
-						this.logger.info(this.schema.settings.app.name, " - Ready on ", `port ${this.schema.settings.app.port}`);
-						resolve();
-					})
 				})
 				.catch((e) => {
 					// console.log("error", e);
@@ -159,26 +220,6 @@ module.exports = {
 
 
 		this.logger.info(this.schema.settings.app.name, " - created");
-
-		//	We must nextjs build before launching the nodejs app
-		// let promise = undefined;
-
-		// if (this.schema.settings.app.build) {
-		// 	promise = this.build(this.schema.settings.app.dev, dir)
-		// 	.then(() => {
-		// 		return this.start(
-		// 			Object.assign(this.schema.settings.app, {
-		// 				dir
-		// 			})
-		// 		);
-		// 	})
-		// } else {
-		// 	promise = this.start(
-		// 		Object.assign(this.schema.settings.app, {
-		// 			dir
-		// 		})
-		// 	);
-		// }
 
 		this.start(
 			Object.assign(this.schema.settings.app, {
