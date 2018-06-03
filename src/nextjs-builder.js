@@ -62,7 +62,7 @@ ext_file_list.map((path) => {
 	for (var i = 0; i < difference_jumps; i++) {
 		nextjs_relative += "../";
 	}
-	nextjs_relative += "node_modules/moleculer-nextjs/node_modules/next/dist/bin/next build";
+	nextjs_relative += "node_modules/next/dist/bin/next build";
 	var final_command = `cd ${path} && ${nextjs_relative}`;
 	commands.push(final_command);
 })
