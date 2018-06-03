@@ -75,6 +75,12 @@ module.exports = {
 I've not finished it yet but it worked.
 See the usage, i'll make a small documentation in few days!
 
+#	Example
+
+If you want to see an example, I made a socket-io + nextjs + moleculer repo here : 
+
+https://github.com/davidroman0O/moleculer-nextjs-socketio-example
+
 
 # Usage
 
