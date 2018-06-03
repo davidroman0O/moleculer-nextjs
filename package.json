@@ -1,6 +1,6 @@
 {
   "name": "moleculer-nextjs",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Mixin for Node-nextjs",
   "main": "index.js",
   "scripts": {

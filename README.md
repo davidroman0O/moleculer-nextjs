@@ -9,6 +9,11 @@ It's time to have SSR on Moleculer!
 
 # Installation
 
+##	Step 0 : your www folder
+
+At the root of your project, create a `www` folder.
+Inside of this folder, you will create new folders for your NextJs websites!
+
 ## Step 1 : Command line
 
 moleculer-nextjs depends on next, so you have to install it too!
