@@ -5,15 +5,68 @@
 
 #   Description
 
-Simple NextJs addon for moleculer
+It's time to have SSR on Moleculer! 
 
-# Install
+# Installation
+
+## Step 1 : Command line
+
+moleculer-nextjs depends on next, so you have to install it too!
+
+Note: install the same version of the addon. I'll update the next line for every updates!
 
 ```bash
-$ npm install moleculer-nextjs --save
+$ npm install next@6.0.4-canary.3 moleculer-nextjs --save
+```
+
+##	Step 2 : Package
+
+Inside of your package.json, you should add this line inside of the `scripts` object.
+
+```
+"build-nextjs": "node ./node_modules/moleculer-nextjs/src/nextjs-builder --web ./www",
+```
+
+Then, edit your `start` script by adding `npm run build-nextjs &&` before firing the command that start your server.
+
+##	Step 3 : Babel!
+
+Make sure to have a `.babelrc.js` file at the root of your NextJs project folder.
+
+Here a sample one:
+
+```
+//	.babelrc.js
+const babel = {
+	presets: [
+		'next/babel'
+	]
+}
+module.exports =  babel;
+
+```
+
+You can edit your own settings later :)
+
+##	Step 4 : environment
+
+Make sure to have a `env-config.js` file at the root of your NextJs project folder.
+
+
+Like this :
+
+```
+//	env-config.js
+const prod = process.env.NODE_ENV === 'production'
+
+module.exports = {
+	'process.env.NODE_ENV': process.env.NODE_ENV,
+}
+
 ```
 
 # Note
+
 I've not finished it yet but it worked.
 See the usage, i'll make a small documentation in few days!
 
@@ -35,20 +88,17 @@ module.exports = {
 	mixins: [ NextJS ],
 
 	settings: {
-		app: {
-			name: "FrontOffice",
-			dev: process.env.NODE_ENV !== 'production',
-			port: 4000,
-			quiet: false,
-			build: true,
-			conf: {
-					webpack: (config, { buildId, dev, isServer, defaultLoaders }) => {
-						return config;
-					},
-			},
-			dir: "www/fo",
-			common_folder: "www/common"
-		}
+		name: "FrontOffice",
+		dev: process.env.NODE_ENV !== 'production',
+		port: 4000,
+		conf: {
+				webpack: (config, { buildId, dev, isServer, defaultLoaders }) => {
+					return config;
+				},
+		},
+		dir: "www/fo",
+		//	It's a common folder inside of your www folder that's contain every React components you want to share between every services that refer it
+		common_folder: "www/common"
 	},
 
 	//	Better route declaration !
