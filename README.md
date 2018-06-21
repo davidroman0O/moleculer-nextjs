@@ -21,7 +21,7 @@ moleculer-nextjs depends on next, so you have to install it too!
 Note: install the same version of the addon. I'll update the next line for every updates!
 
 ```bash
-$ npm install next@6.0.4-canary.3 moleculer-nextjs --save
+$ npm install next@6.0.4-canary.8 moleculer-nextjs --save
 ```
 
 ##	Step 2 : Package
